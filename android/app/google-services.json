@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "810943375811",
+    "project_id": "softara-2026",
+    "storage_bucket": "softara-2026.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:810943375811:android:3089ee644765868e7d3576",
+        "android_client_info": {
+          "package_name": "com.project.linkup"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7f_uJwENFfvD61684OsxGLgKciqUW5_I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,11 @@
+url https://ptqgasrzgpgjxdxxzayt.supabase.co
+anon key    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0cWdhc3J6Z3BnanhkeHh6YXl0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNDY5ODIsImV4cCI6MjA4OTkyMjk4Mn0.r47jNO01CL78-xifLtqe6c4KVvj0kp6lm2ol1EMcHV8
+
+
+I/flutter (30036): Upload failed: StorageException(message: Invalid Storage request, statusCode: 404, error: null)
+
+
+
+Downloading packages...
+ClientException with SocketException: Failed host lookup: 'pub.dev' (OS Error: No such host is known, errno = 11001), uri=https://pub.dev/api/packages/archive/advisories
+Failed to update packages.

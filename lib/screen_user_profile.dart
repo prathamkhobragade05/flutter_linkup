@@ -31,7 +31,7 @@ class UserProfileStatee extends State<UserProfile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Profile $loggedUserId"),),
+      appBar: AppBar(title: Text(isEditable?"My Profile":"Profile"),),
       body: Padding(
         padding: EdgeInsets.all(15),
         child: SingleChildScrollView(

@@ -1,4 +1,5 @@
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:linkup/service_firebase.dart';
 
@@ -15,6 +16,10 @@ class BottomSheetModel extends StatefulWidget{
 }
 
 class BottomSheetModelState extends State<BottomSheetModel> {
+  bool isLoading = false;
+  bool isAuthenticate=false;
+  String? errorMessage=" ";
+
   late FocusNode firstFocusNode;
   late FocusNode secondFocusNode;
 
@@ -65,6 +70,11 @@ class BottomSheetModelState extends State<BottomSheetModel> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (errorMessage != null)
+          Text(
+            errorMessage!,
+            style: TextStyle(color:isAuthenticate?Colors.green:Colors.red),
+          ),SizedBox(height: 10,),
                                                                                 //-------new input value
         TextFormField(
           focusNode: firstFocusNode,
@@ -106,12 +116,47 @@ class BottomSheetModelState extends State<BottomSheetModel> {
           width: double.infinity,
           child: ElevatedButton(
               onPressed: () async {
-                if(inputValidation() && (userValueOld!=controllerInputOne.text.toString())){
-                  await buttonAction();
-                }
-                else{
+                String message=" ";
+                isAuthenticate=false;
+
+                setState(() {
+                  errorMessage=message;
+                  isLoading=true;
+                });
+
+
+                if(!inputValidation()){
+                  setState(() => isLoading = false);
                   return;
                 }
+                else if(userValueOld==controllerInputOne.text.toString()){
+                  setState(() {
+                    errorMessage="Enter New Value";
+                    isLoading=false;
+                  });
+                  return;
+                }
+
+                try{
+                  print("---------------actions button");
+                  await buttonAction();
+                }catch(e){
+                  print("-------------------------------------------++++++++++---$e");
+                  if (e is FirebaseAuthException) {
+                    switch(e.code){
+
+                    }
+                    print("------------------------------------------${e.code}");
+                  }
+
+                  print("------------------------------------------${e}");
+                }finally{
+                  setState(() {
+                    // errorMessage=message;
+                    isLoading=false;
+                  });
+                }
+
 
                 if(isReadOnly){
                   WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -120,7 +165,18 @@ class BottomSheetModelState extends State<BottomSheetModel> {
                 }
                 setState(() { });
               },
-              child: Text(buttonText)
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  shape:RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)
+                  )
+              ),
+              child: !isLoading?Text(buttonText):SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(color: Colors.white),
+              ),
           ),
         )
       ],
@@ -147,22 +203,34 @@ class BottomSheetModelState extends State<BottomSheetModel> {
   }
 
   bool inputValidation(){
+    bool isValid=false;
+    String? message;
+
     if(controllerInputOne.text.isNotEmpty){
       if(isSecondInputVisible){
         if(controllerInputTwo.text.isNotEmpty){
-          return true;
+          isValid=true;
         }else{
-          return false;
+          message="All fields are required";
+          isValid=false;
         }
       }else{
-        return true;
+        isValid=true;
       }
     }else{
-      return false;
+      message="Enter new value";
+      isValid=false;
     }
+    if(!isValid){
+      setState(() {
+        errorMessage=message;
+      });
+    }
+    return isValid;
   }
 
   Future<void> buttonAction() async {
+    String message=" ";
     userValueNew=controllerInputOne.text.toString();
     if(buttonText=="Save"){
       if(widget.title=="Password"){
@@ -207,8 +275,14 @@ class BottomSheetModelState extends State<BottomSheetModel> {
           buttonText="Save";
           controllerInputOne.clear();
         }
+      }else{
+        message="Incorrect password";
       }
     }
+    setState(() {
+      errorMessage=message;
+      isLoading=false;
+    });
   }
 
 

@@ -10,7 +10,7 @@ import 'package:linkup/services/api.dart';
 
 
 class UserProfileView extends StatefulWidget{
-  final dynamic imageProvider;
+  final ImageProvider? imageProvider;
   final String username;
   final bool isUserProfile;
   const UserProfileView(this.username,this.imageProvider,this.isUserProfile,{super.key});
@@ -22,7 +22,7 @@ class UserProfileViewState extends State<UserProfileView> {
   // bool isProfileDeleted= false;
   // bool isNewProfileImage=false;
   late bool isUserProfile=widget.isUserProfile;
-  late ImageProvider imageProvider=widget.imageProvider;
+  late ImageProvider? imageProvider=widget.imageProvider;
   late String username=widget.username;
                                                                                 //---change profileImg
   List<IconButton> appBarActions(){
@@ -52,7 +52,7 @@ class UserProfileViewState extends State<UserProfileView> {
 //--------body
       body:Center(
         child: Image(
-          image: imageProvider
+          image: imageProvider??const AssetImage("assets/images/default_user.jpg"),
         ),
       )
     );

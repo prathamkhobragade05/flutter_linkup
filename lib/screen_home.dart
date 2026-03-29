@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:linkup/screen_user_profile.dart';
 import 'package:linkup/screen_user_profile_.dart';
 import 'package:linkup/service_firebase.dart';
+import 'package:linkup/services/user_status.dart';
 
 late String loggedUserId;
 
@@ -16,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class HomeScreenState extends State<HomeScreen> {
+  ImageProvider? loggedUserImage;
   bool isSearching = false;
   TextEditingController searchController = TextEditingController();
 
@@ -23,11 +25,38 @@ class HomeScreenState extends State<HomeScreen> {
   List<QueryDocumentSnapshot> filteredList = [];
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
     loggedUserId = widget.userId;
+//---------------------status set online
+    UserStatus().startMonitoring();
+  }
 
+  @override
+  void dispose() {
+    super.dispose();
+    // Optionally set user offline when leaving screen
+    UserStatus().setOffline();
+    print("home screen------------------setting offline------");
+
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: !isSearching?Image.asset("assets/images/app_icon.png",scale: 10,):
+        IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            setState(() {
+              isSearching = false;
+              searchController.clear();
+              filteredList = users;
+            });
+          },
+        ),
+
         title: !isSearching ? const Text("LinkUP")
           :TextField(
             controller: searchController,
@@ -50,54 +79,37 @@ class HomeScreenState extends State<HomeScreen> {
               });
             },
           ) ,
-
-        leading: !isSearching?Image.asset("assets/images/app_icon.png",scale: 10,):
-          IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              setState(() {
-                isSearching = false;
-                searchController.clear();
-                filteredList = users;
-              });
-            },
-          ),
-
         actions: [
-          IconButton(
-            icon: Icon(isSearching ? Icons.close : Icons.search),
-            onPressed: () {
-              setState(() {
-                isSearching = !isSearching;
+          Padding(
+              padding:EdgeInsetsGeometry.only(right: 15),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: Icon(isSearching ? Icons.close : Icons.search),
+                    onPressed: () {
+                      setState(() {
+                        isSearching = !isSearching;
 
-                if (!isSearching) {
-                  searchController.clear();
-                  filteredList = users;
-                }
-              });
-            },
-          ),
-
-          if (!isSearching)
-            PopupMenuButton(
-              onSelected: (value) {
-                if (value == "profile") {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          UserProfile(loggedUserId, true),
-                    ),
-                  );
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: "profile",
-                  child: Text("Profile"),
-                ),
-              ],
-            ),
+                        if (!isSearching) {
+                          searchController.clear();
+                          filteredList = users;
+                        }
+                      });
+                    },
+                  ),
+                  if (!isSearching)
+                    CircleAvatar(
+                      radius: 18,
+                      backgroundImage: loggedUserImage??AssetImage("assets/images/default_user.jpg"),
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(context,MaterialPageRoute(builder: (context) => UserProfile(loggedUserId, true)));
+                        },
+                      ),
+                    )
+                ],
+              ),
+            )
         ],
       ),
 //---------------------main body
@@ -131,49 +143,56 @@ class HomeScreenState extends State<HomeScreen> {
           return const Center(child: Text("No users found"));
         }//no data
 
-        if (users.isEmpty) {
-          users = snapshot.data!.docs;
+        // if (users.isEmpty) {
+        //   users = snapshot.data!.docs;
+        //   filteredList = users;
+        // }
+
+        users = snapshot.data!.docs;
+        if (filteredList.isEmpty) {
           filteredList = users;
         }
-
         return ListView.builder(
-          itemCount: filteredList.length,
+          itemCount: users.length,
           itemBuilder: (context, index) {
 
-            var user = filteredList[index];
+            var user = users[index];
             var data = user.data() as Map<String, dynamic>;
 
             String userId = user.id;
             String name = data['Username'] ?? "linkup2026";
             String? profileImage = data['ProfileImage'];
-
-            ImageProvider imageProviderH;
+            bool? isOnline = data['isOnline'] ?? false;
+            String status=isOnline!?"Online":"Offline";
+            ImageProvider? imageProviderH;
 
             if (profileImage != null && profileImage.isNotEmpty) {
               imageProviderH = NetworkImage(profileImage);
-            } else {
-              imageProviderH =
-              const AssetImage("assets/images/default_user.jpg");
             }
+
+            if (loggedUserId == userId && loggedUserImage == null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  loggedUserImage = imageProviderH;
+                });
+              });
+            }
+            // if(loggedUserId == userId){
+            //   return SizedBox();
+            // }
 
             return ListTile(
               leading: CircleAvatar(
                 radius: 25,
-                backgroundImage: imageProviderH,
+                backgroundImage: imageProviderH??const AssetImage("assets/images/default_user.jpg"),
                 child: InkWell(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            UserProfileView(name, imageProviderH, false),
-                      ),
-                    );
+                    Navigator.push(context,MaterialPageRoute(builder: (context) =>UserProfileView(name, imageProviderH, false),),);
                   },
                 ),
               ),
               title: Text(name),
-              subtitle: Text(userId),
+              subtitle: Text(status),
               trailing: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
@@ -186,7 +205,7 @@ class HomeScreenState extends State<HomeScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        ChattingScreen(userId, name, imageProviderH),
+                        ChattingScreen(userId, name, imageProviderH,status),
                   ),
                 );
               },

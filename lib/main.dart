@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:linkup/screen_home.dart';
 import 'package:linkup/screen_login.dart';
 import 'package:flutter/material.dart';
+import 'package:linkup/services/user_status.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide User;
 
@@ -12,10 +14,13 @@ AppDatabase db = AppDatabase();
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  await dotenv.load(fileName: ".env");
   await Supabase.initialize(
-    url: 'https://ptqgasrzgpgjxdxxzayt.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0cWdhc3J6Z3BnanhkeHh6YXl0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNDY5ODIsImV4cCI6MjA4OTkyMjk4Mn0.r47jNO01CL78-xifLtqe6c4KVvj0kp6lm2ol1EMcHV8',
+    url: dotenv.env['SUPABASE_URL']!,
+    anonKey: dotenv.env['SUPABASE_API_KEY']!,
   );
+
   runApp(const MyApp());
 }
 

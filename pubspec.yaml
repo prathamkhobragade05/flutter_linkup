@@ -29,8 +29,8 @@ dependencies:
   supabase_flutter: ^2.12.2
   storage_client: ^2.5.1
   supabase: ^2.10.4
-
-  cloudinary_sdk: ^5.0.0+1
+  flutter_dotenv: ^6.0.0
+  connectivity_plus: ^7.0.0
 
 dev_dependencies:
   flutter_test:
@@ -49,6 +49,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - .env
 
   # fonts:
   #   - family: Schyler
